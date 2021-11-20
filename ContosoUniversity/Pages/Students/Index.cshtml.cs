@@ -29,14 +29,20 @@ namespace ContosoUniversity.Pages.Students
 
         public IList<Student> Students { get; set; }
 
-        public async Task OnGetAsync(string sortOrder)
+        public async Task OnGetAsync(string sortOrder, string searchString)
         {
-            // using System;
             NameSort = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             DateSort = sortOrder == "Date" ? "date_desc" : "Date";
 
+            CurrentFilter = searchString;
+
             IQueryable<Student> studentsIQ = from s in _context.Students
                                              select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                studentsIQ = studentsIQ.Where(s => s.LastName.Contains(searchString)
+                                       || s.FirstMidName.Contains(searchString));
+            }
 
             switch (sortOrder)
             {
@@ -59,26 +65,4 @@ namespace ContosoUniversity.Pages.Students
             Students = await studentsIQ.AsNoTracking().ToListAsync();
         }
     }
-
-
-    //public class IndexModel : PageModel
-    //{
-    //    private readonly SchoolContext _context;
-    //    private readonly MvcOptions _mvcOptions;
-
-    //    public IndexModel(SchoolContext context, IOptions<MvcOptions> mvcOptions)
-    //    {
-    //        _context = context;
-    //        _mvcOptions = mvcOptions.Value;
-    //    }
-
-    //    public IList<Student> Student { get;set; }
-
-    //    public async Task OnGetAsync()
-    //    {
-    //        // MaxModelBindingCollectionSize defaults to 1024
-    //        Student = await _context.Students.Take(
-    //            _mvcOptions.MaxModelBindingCollectionSize).ToListAsync();
-    //    }
-    //}
 }
